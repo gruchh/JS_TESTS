@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>TIC TAC - trening</title>
+	<meta http-equiv="Content-Type" content="text/html;  charset=utf-8">
+    <script src="https://ajax.aspnetcdn.com/ajax/jQuery/jquery-3.3.1.min.js"></script>
+	<link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
+	<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+
+    <style>
+	
+	* {
+		margin: 0;
+		padding: 0;
+	}
+	
+	.container {
+		
+	}
+	
+	.info-section {
+		margin: 50px 0;
+		text-align: center;
+	}
+	
+	#gameBoard {
+		margin: 100px auto;
+		display: grid;
+		height: 300px;
+		width: 300px;
+		grid-template-columns: 1fr 1fr 1fr;
+		grid-template-rows: 1fr 1fr 1fr;
+
+	}
+	
+	.field {
+		background-color: orange;
+		border: 1px solid black;
+	}
+	
+	.x {
+		font-size: 2em;
+		background-color:red;
+	}
+	
+	.o {
+		font-size: 2em;
+		background-color: green;
+	
+	}
+	
+	bd-right {
+		border-right: 1px solid black;
+	}
+	
+
+
+    </style>
+
+</head>
+
+<body>
+
+	<div class="container">
+		<div class="info-section">
+			<p>Aktualny gracz: </p><div class="actual-player"></div>
+		</div>
+		<div id="gameBoard">
+			<div id="field1" class="field bd-right"></div>
+			<div id="field2" class="field"></div>
+			<div id="field3" class="field"></div>
+			<div id="field4" class="field"></div>
+			<div id="field5" class="field"></div>
+			<div id="field6" class="field"></div>
+			<div id="field7" class="field"></div>
+			<div id="field8" class="field"></div>
+			<div id="field9" class="field"></div>
+		</div>
+	</div>
+	
+	<script>
+
+	var currentPlayer = 1;
+	
+	$(document).ready(function() {
+	
+		$('.actual-player').text(currentPlayer);
+	
+	});
+	
+	function checkIfRowsWins() {
+	
+		var condition ="";
+		var result ="";
+			
+		for (var i = 1; i <=3; i++) {		
+		for (var j = 1; j <= 3; j++) {	
+			condition += '$("#field' + (3*(i-1)+j) +'").hasClass("x")' + (j!=3 ? " && " : "" );
+		}
+		
+		console.log(eval(condition) ? result=true : "");
+		condition = "";
+		}
+		
+		return result;	
+	}
+	
+	
+	$('.field').on('click', function() {
+	
+	checkIfRowsWins();	
+	
+	//	checkIfRowsWins(1) ? console.log("T") : console.log("N");
+	//	checkIfRowsWins(2) ? console.log("T") : console.log("N");
+	//	checkIfRowsWins(3) ? console.log("T") : console.log("N");
+		
+		//checkIfRowsWins(2);
+		//checkIfRowsWins(3);
+	
+		if (!$(this).is('.o, .x')) {
+		
+			switch(currentPlayer) {
+				case 1:
+					$(this).addClass('x');
+					currentPlayer = (currentPlayer%2) + 1;
+				break;
+				case 2:
+					$(this).addClass('o');
+				currentPlayer = (currentPlayer%2) + 1;
+				break;
+				default:
+				consol.log('ERROR. Zły numer gracza.');
+			}
+		}
+	
+		$('.actual-player').text(currentPlayer);
+		
+	});
+	</script>
+	
+</body>
+
+
+</html>
