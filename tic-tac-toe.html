@@ -8,22 +8,55 @@
 	<link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
 	<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css"
 		integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
-
+	<link href="https://fonts.googleapis.com/css?family=Germania+One|Montserrat" rel="stylesheet"> 
 	<style>
 		* {
 			margin: 0;
 			padding: 0;
+			background-color: #d7d7ea;
 		}
 
-		.container {}
-
-		.info-section {
-			margin: 50px 0;
+		.container {
+			margin: 0 auto;	
+			max-width: 1200px;
 			text-align: center;
 		}
 
+		.info-section {
+			font-family: 'Germania One', cursive;
+			font-size: 36px;
+			margin: 50px 0;
+			text-align: center;
+		}
+		
+		.player-section > .actual-player {
+			margin: 20px auto;
+			display: inline-block;
+			width: 100px;
+			height: 100px;
+			line-height: 100px;
+			vertical-align: center;
+			horizontal-align: center;
+			font-size: 2em;
+			color: #7c2222;
+			background-color: #e2cccc;
+			border: 4px solid #7c2222;
+		}
+		
+		.player-section > .movement-count {
+			font-size: .5em;			
+		}
+		
+		.player-section > .movement-count > * {
+			display: inline-block;
+		}
+		
+		.actual-movement-count {
+			display:inline-block;
+		}
+
 		#gameBoard {
-			margin: 100px auto;
+			margin: 50px auto;
 			display: grid;
 			height: 300px;
 			width: 300px;
@@ -43,7 +76,7 @@
 
 		.o {
 			font-size: 2em;
-			background-color: green;
+			background-color: green;	
 
 		}
 
@@ -54,6 +87,25 @@
 		.bd-bottom {
 			border-bottom: 2px solid white;
 		}
+		
+		.service-section {
+			display: inline-block;
+			margin: 40px 0;
+			vertical-align: center;
+			text-align: center;			
+		}
+		
+		input[type="button"] {
+			display: inline-block;
+			padding: 20px 40px;
+			font-size: 30px;
+			background-color: #6363ff;
+			list-style: none;
+			color: white;
+			font-weight: bold;
+			border: 4px solid blue;
+		}
+		
 	</style>
 
 </head>
@@ -62,8 +114,14 @@
 
 	<div class="container">
 		<div class="info-section">
-			<p>Aktualny gracz: </p>
-			<div class="actual-player"></div>
+			<div class="player-section">
+				<p>Aktualny gracz: </p>
+				<div class="actual-player"></div>
+				<div class="movement-count">
+					<p>Liczba wykonanych ruchów: </p>
+					<div class="actual-movement-count">0</div>
+				</div>
+			</div>
 		</div>
 		<div id="gameBoard">
 			<div id="field1" class="field bd-right bd-bottom"></div>
@@ -76,22 +134,35 @@
 			<div id="field8" class="field bd-right"></div>
 			<div id="field9" class="field"></div>
 		</div>
+		<div class="service-section">
+			<div class="service-buttons">
+				<input class="start" type="button" value="Start" />
+				<input class="stop" type="button" value="Stop" />
+				<input class="resume" type="button" value="Resume" />
+			</div>
+		</div>
 	</div>
 
 	<script>
 		var currentPlayer = 1;
-		var startGame = false;
+		var gameStarted = false;
+		var moveCount = 0;
 
 		$(document).ready(function () {
 
 			$('.actual-player').text(currentPlayer);
-			//startGame();
+			gameStarted = true;
 
 		});
-
-		function startGame() {
-
-			startGame = true;
+		
+		function resetGame() {
+		
+			currentPlayer = 1;
+			$('.actual-player').text(currentPlayer);			
+			for(var i=1; i<=$("#gameBoard").children().length; i++) {
+				$('#field'+i).removeClass("x");
+				$('#field'+i).removeClass("o");			
+			}			
 		}
 
 		function checkIfRowsWins(sign) {
@@ -104,14 +175,16 @@
 				for (var j = 1; j <= row; j++) {
 					condition += '$("#field' + (row*i + j) + '").hasClass("' + sign + '")' + (j != row ? " && " : "");
 				}
-
 				eval(condition) ? result = true : "";
 				condition = "";
 			}
 
-			result == true ? alert('Zwyciężył ' + sign) : "";
+			if (result == true) {
+				alert('Zwyciężył ' + sign);
+				gameStarted = false;
+			}
 
-			return result;
+			return result;			
 		}
 
 		function checkIfColumnsWins(sign) {
@@ -124,45 +197,98 @@
 				for (var j = 0; j < row; j++) {
 					condition += '$("#field' + (i + row*j) + '").hasClass("' + sign + '")' + (j != (row-1) ? " && " : "");
 				}
-
 				eval(condition) ? result = true : "";
 				condition = "";
 			}
 			
-			result == true ? alert('Zwyciężył ' + sign) : "";
-
+			if (result == true) {
+				alert('Zwyciężył ' + sign);
+				gameStarted = false;
+			}
 		}
+		
+		function checkIfDiagonalWins (sign) {
+		
+			var condition = "";
+			var result = "";
+			var row = Math.sqrt($("#gameBoard").children().length);
+			
+			for (var i = 0; i < row; i++) {
+				condition += '$("#field' + (1 + i*(row+1)) + '").hasClass("' + sign + '")' + (i != (row-1) ? " && " : "");
+			}
+			
+			console.log(condition);			
+			eval(condition) ? result = true : "";
+			condition = "";
+			
+			for (var i = 0; i < row; i++) {
+				condition += '$("#field' + (row + i*(row-1)) + '").hasClass("' + sign + '")' + (i != (row-1) ? " && " : "");
+			}
+			
+			console.log(condition);			
+			eval(condition) ? result = true : "";
+			condition = "";
+			
+			if (result == true) {
+				alert('Zwyciężył ' + sign);
+				gameStarted = false;
+			}
+			
+		}
+		
 
 		$('.field').on('click', function () {
 
-
-			if (!$(this).is('.o, .x')) {
-
-				switch (currentPlayer) {
-					case 1:
-						$(this).addClass('x');
-						currentPlayer = (currentPlayer % 2) + 1;
-						break;
-					case 2:
-						$(this).addClass('o');
-						currentPlayer = (currentPlayer % 2) + 1;
-						break;
-					default:
-						consol.log('ERROR. Zły numer gracza.');
+			if (gameStarted) {
+			
+				if (!$(this).is('.o, .x')) {
+				
+					moveCount+=1;
+					$('.actual-movement-count').html(moveCount);
+					switch (currentPlayer) {
+						case 1:
+							$(this).addClass('x');
+							currentPlayer = (currentPlayer % 2) + 1;
+							break;
+						case 2:
+							$(this).addClass('o');
+							currentPlayer = (currentPlayer % 2) + 1;
+							break;
+						default:
+							consol.log('ERROR. Zły numer gracza.');
+					}
 				}
+
+				checkIfRowsWins("x");
+				checkIfRowsWins("o");
+				checkIfColumnsWins("x");
+				checkIfColumnsWins("o");
+				checkIfDiagonalWins ("x");
+				checkIfDiagonalWins ("o");
+				$('.actual-player').text(currentPlayer);
+				
+			} else {
+				resetGame();		
 			}
-
-			checkIfRowsWins("x");
-			checkIfRowsWins("o");
-			checkIfColumnsWins("x");
-			checkIfColumnsWins("o");
-
-			$('.actual-player').text(currentPlayer);
-
 		});
-	</script>
+		
+		$('.start').on('click', function() {
+			resetGame();
+			gameStarted = true;
+			moveCount = 0;
+		});
+		
+		$('.stop').on('click', function() {
+			resetGame();
+			gameStarted = false;
+		});
+
+		$('.resume').on('click', function() {
+			gameStarted = true;
+		});
+		
+	
+</script>
 
 </body>
-
-
 </html>
