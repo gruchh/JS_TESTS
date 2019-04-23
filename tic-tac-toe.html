@@ -106,6 +106,11 @@
 			border: 4px solid blue;
 		}
 		
+		input[type="button"]:disabled {
+			background-color: #cecece;
+			border: 4px solid #5e5e5e;
+		}
+		
 	</style>
 
 </head>
@@ -119,7 +124,7 @@
 				<div class="actual-player"></div>
 				<div class="movement-count">
 					<p>Liczba wykonanych ruchów: </p>
-					<div class="actual-movement-count">0</div>
+					<div class="actual-movement-count"></div>
 				</div>
 			</div>
 		</div>
@@ -147,13 +152,25 @@
 		var currentPlayer = 1;
 		var gameStarted = false;
 		var moveCount = 0;
+		var possibleSituations = ["x", "o"];
+		
 
 		$(document).ready(function () {
-
-			$('.actual-player').text(currentPlayer);
-			gameStarted = true;
-
+		
+			startGame ();
 		});
+		
+		function startGame () {
+		
+			resetGame();
+			gameStarted = true;
+			moveCount = 0;
+			$('.actual-movement-count').html(moveCount);
+			$(".start").attr("disabled", true);
+			$(".stop").attr("disabled", false);
+			$(".resume").attr("disabled", true);
+			
+		}
 		
 		function resetGame() {
 		
@@ -164,75 +181,100 @@
 				$('#field'+i).removeClass("o");			
 			}			
 		}
-
-		function checkIfRowsWins(sign) {
+		
+		
+		// Check if marks in each row are the same. Input - array of chars. 
+		function checkIfRowsWins(signs) {
 
 			var condition = "";
 			var result = "";
 			var row = Math.sqrt($("#gameBoard").children().length);
 
-			for (var i = 0; i < row; i++) {
-				for (var j = 1; j <= row; j++) {
-					condition += '$("#field' + (row*i + j) + '").hasClass("' + sign + '")' + (j != row ? " && " : "");
-				}
-				eval(condition) ? result = true : "";
+			$.each(signs, function(index, value ){
+				// Checking each row looking for compatibility
+				for (var i = 0; i < row; i++) {
+					// Creating condition
+					for (var j = 1; j <= row; j++) {
+						condition += '$("#field' + (row*i + j) + '").hasClass("' + value + '")' + (j != row ? " && " : "");
+					}
+				// Comparition of the result 
+				eval(condition) ? result = true : result = false;
 				condition = "";
-			}
-
-			if (result == true) {
-				alert('Zwyciężył ' + sign);
+				
+				if (result == true) {
+				alert('Zwyciężył ' + value);
 				gameStarted = false;
+				}			
 			}
+			
+			});		
 
 			return result;			
-		}
-
-		function checkIfColumnsWins(sign) {
+		}		
+		
+		// Check if marks in each rows row are the same. Input - array of chars.
+		function checkIfColumnsWins(signs) {
 
 			var condition = "";
 			var result = "";
 			var row = Math.sqrt($("#gameBoard").children().length);
-
-			for (var i = 1; i <= row; i++) {
-				for (var j = 0; j < row; j++) {
-					condition += '$("#field' + (i + row*j) + '").hasClass("' + sign + '")' + (j != (row-1) ? " && " : "");
+			
+			$.each(signs, function(index, value){
+				// Checking each column looking for compatibility
+				for (var i = 1; i <= row; i++) {
+					// Creating condition
+					for (var j = 0; j < row; j++) {
+						condition += '$("#field' + (i + row*j) + '").hasClass("' + value + '")' + (j != (row-1) ? " && " : "");
+					}
+					
+					// Comparition of the result 
+					eval(condition) ? result = true : result = false;
+					condition = "";
+				
+					if (result == true) {
+						alert('Zwyciężył ' + value);
+						gameStarted = false;
+					}				
 				}
-				eval(condition) ? result = true : "";
-				condition = "";
-			}
-			
-			if (result == true) {
-				alert('Zwyciężył ' + sign);
-				gameStarted = false;
-			}
+			});
 		}
 		
-		function checkIfDiagonalWins (sign) {
+		// Check if marks in each diagonal are the same. Input - array of chars.
+		function checkIfDiagonalWins (signs) {
 		
 			var condition = "";
 			var result = "";
 			var row = Math.sqrt($("#gameBoard").children().length);
 			
-			for (var i = 0; i < row; i++) {
-				condition += '$("#field' + (1 + i*(row+1)) + '").hasClass("' + sign + '")' + (i != (row-1) ? " && " : "");
-			}
-			
-			console.log(condition);			
-			eval(condition) ? result = true : "";
-			condition = "";
-			
-			for (var i = 0; i < row; i++) {
-				condition += '$("#field' + (row + i*(row-1)) + '").hasClass("' + sign + '")' + (i != (row-1) ? " && " : "");
-			}
-			
-			console.log(condition);			
-			eval(condition) ? result = true : "";
-			condition = "";
-			
-			if (result == true) {
-				alert('Zwyciężył ' + sign);
-				gameStarted = false;
-			}
+			$.each(signs, function(index, value){
+				// Creating condition
+				for (var i = 0; i < row; i++) {
+					condition += '$("#field' + (1 + i*(row+1)) + '").hasClass("' + value + '")' + (i != (row-1) ? " && " : "");				
+				}
+				// Comparition of the result 
+				eval(condition) ? result=true : result=false;
+				condition = "";
+				
+				if (result == true) {
+					alert('Zwyciężył ' + value);
+					gameStarted = false;
+				}
+				
+				// Creating condition
+				for (var i = 0; i < row; i++) {
+					condition += '$("#field' + (row + i*(row-1)) + '").hasClass("' + value + '")' + (i != (row-1) ? " && " : "");					
+				}
+				
+				// Comparition of the result 
+				eval(condition) ? result=true : result=false;
+				condition = "";
+				
+				if (result == true) {
+					alert('Zwyciężył ' + value);
+					gameStarted = false;
+				}
+				
+			});
 			
 		}
 		
@@ -259,32 +301,30 @@
 					}
 				}
 
-				checkIfRowsWins("x");
-				checkIfRowsWins("o");
-				checkIfColumnsWins("x");
-				checkIfColumnsWins("o");
-				checkIfDiagonalWins ("x");
-				checkIfDiagonalWins ("o");
+				checkIfRowsWins(possibleSituations);
+				checkIfColumnsWins(possibleSituations);
+				checkIfDiagonalWins (possibleSituations);
 				$('.actual-player').text(currentPlayer);
 				
-			} else {
-				resetGame();		
 			}
 		});
 		
 		$('.start').on('click', function() {
-			resetGame();
-			gameStarted = true;
-			moveCount = 0;
+			startGame ();
 		});
 		
 		$('.stop').on('click', function() {
-			resetGame();
 			gameStarted = false;
+			$(".start").attr("disabled", false);
+			$(".resume").attr("disabled", false);
+			$(".stop").attr("disabled", true);
 		});
 
 		$('.resume').on('click', function() {
 			gameStarted = true;
+			$(".start").attr("disabled", true);
+			$(".stop").attr("disabled", false);
+			$(".resume").attr("disabled", true);
 		});
 		
 	
